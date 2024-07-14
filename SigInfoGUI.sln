@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28917.181
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SigInfoGUI", "SigInfoGUI\SigInfoGUI.vcxproj", "{94D79D32-0E8D-4ABC-9446-800B11F95E25}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SigInfoGUI", "SigInfoGUI.vcxproj", "{94D79D32-0E8D-4ABC-9446-800B11F95E25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +26,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {C18980FB-852F-4432-A751-1A7585141BC9}
+		SolutionGuid = {3DEA0CF4-10CC-47FA-B068-1CE1D72DF72B}
 	EndGlobalSection
 EndGlobal
