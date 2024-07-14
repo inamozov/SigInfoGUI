@@ -1,6 +1,7 @@
 #pragma comment(lib, "comctl32.lib")
 
 #include <windows.h>
+#include <shlwapi.h>
 #include <commctrl.h>
 #include "SigInfo.h"
 #include "resource.h"
@@ -14,7 +15,7 @@ bool ListBoxCopy(HWND hwndView) {
 	wchar_t* oneArrayOfData;
 	wchar_t** viewDataArray = (wchar_t**)malloc(SIG_DATA_NUM_OF_COLUMNS * sizeof(wchar_t*));
 	for (int i = 0; i < SIG_DATA_NUM_OF_COLUMNS; i++) {
-		viewDataArray[i] = (wchar_t*)malloc(workStringLength);
+		viewDataArray[i] = (wchar_t*)malloc(workStringLength * sizeof(TCHAR));
 	}
 
 	int itemCount = SendDlgItemMessage(hwndView, IDC_LIST_VIEW, LB_GETCOUNT, 0, 0);
@@ -65,7 +66,7 @@ bool InitViewDialog(HWND hwndView, LPARAM lParam) {// lParam = hwndMain
 	int subItemIndex;
 	int selectedRowIndex = 0;
 	int stringFromColumnLength = workStringLength;
-	wchar_t* stringFromColumn = (wchar_t*)malloc(stringFromColumnLength);
+	wchar_t* stringFromColumn = (wchar_t*)malloc(stringFromColumnLength * sizeof(TCHAR));
 	wchar_t** viewDataArray = (wchar_t**)malloc(SIG_DATA_NUM_OF_COLUMNS * sizeof(wchar_t*));
 
 	selectedRowIndex = SendDlgItemMessage((HWND)lParam, IDC_LIST1, LVM_GETNEXTITEM, (WPARAM)-1, (LPARAM)LVNI_SELECTED);
@@ -169,7 +170,7 @@ bool InitFileOpenDialog(HWND hwndMain) {
 		lvItem.mask = LVIF_TEXT;
 		lvItem.cchTextMax = workStringLength;
 		lvItem.iSubItem = 0;
-		lvItem.pszText = (LPWSTR)malloc(lvItem.cchTextMax);
+		lvItem.pszText = (LPWSTR)malloc(lvItem.cchTextMax * sizeof(TCHAR));
 
 		if (FileIsListFile(open.lpstrFile)) {
 			int numLines = 0;
@@ -228,7 +229,7 @@ bool InitMainDialog(HWND hwndMain) {
 	memset(&lvCol, 0, sizeof(lvCol));
 	lvCol.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
 	lvCol.cx = 0x69;
-	lvCol.pszText = (LPWSTR)malloc(workStringLength);
+	lvCol.pszText = (LPWSTR)malloc(workStringLength*sizeof(WCHAR));
 
 	_tcscpy_s(lvCol.pszText, workStringLength, L"Filename");
 	SendMessage(hList, LVM_INSERTCOLUMN, 0, (LPARAM)& lvCol);
@@ -335,7 +336,7 @@ bool InitFileAddAndCheckDialog(HWND hwndMain) {
 
 	bool retval = false;
 	LVITEM lvItem;
-	wchar_t szFile[MAX_PATH * sizeof(wchar_t)];
+	wchar_t szFile[MAX_PATH * 1];
 	OPENFILENAME open;
 	ZeroMemory(&open, sizeof(open));
 
@@ -343,10 +344,10 @@ bool InitFileAddAndCheckDialog(HWND hwndMain) {
 	open.hwndOwner = hwndMain;
 	open.lpstrFile = szFile;
 	open.lpstrFile[0] = '\0';
-	open.nMaxFile = sizeof(szFile);
+	open.nMaxFile = MAX_PATH;
 	open.lpstrTitle = L"Add and check...";
 	open.lpstrFileTitle = NULL;
-	open.lpstrInitialDir = L"C:\\Windows\\Sysnative\\drivers";
+	open.lpstrInitialDir = L"C:\\Windows";
 	open.Flags = OFN_FILEMUSTEXIST;
 
 	if (GetOpenFileName(&open)) { // here we got a filename string which is open.lpstrFile
@@ -355,7 +356,7 @@ bool InitFileAddAndCheckDialog(HWND hwndMain) {
 		lvItem.mask = LVIF_TEXT;
 		lvItem.cchTextMax = workStringLength;
 		lvItem.iSubItem = 0;
-		lvItem.pszText = (LPWSTR)malloc(lvItem.cchTextMax);
+		lvItem.pszText = (LPWSTR)malloc(lvItem.cchTextMax*sizeof(WCHAR));
 
 		if (FileIsListFile(open.lpstrFile)) {
 			int numLines = 0;
@@ -410,7 +411,7 @@ bool CheckLastAddedItem(HWND hwndMain, LVITEM lvItem) {
 			}
 			else {
 				wchar_t* fileName = CutPathFromFile(lvItem.pszText);
-				wchar_t* errorText = (wchar_t*)malloc(workStringLength);
+				wchar_t* errorText = (wchar_t*)malloc(workStringLength * sizeof(TCHAR));
 				_tcscpy_s(errorText, workStringLength, fileName);
 				_tcscat_s(errorText, workStringLength, L" has no signatures.");
 				MessageBox(hwndMain, errorText, L"Error", MB_OK);
@@ -451,7 +452,7 @@ bool CheckSelectedItem(HWND hwndMain) {
 
 			int index = SendDlgItemMessage(hwndMain, IDC_LIST1, LVM_GETNEXTITEM, (WPARAM)-1, (LPARAM)LVNI_SELECTED);
 			
-			wchar_t* workString = (wchar_t*)malloc(workStringLength);
+			wchar_t* workString = (wchar_t*)malloc(workStringLength * sizeof(TCHAR));
 
 			memset(&lvItem, 0, sizeof(lvItem));
 			lvItem.mask = LVIF_TEXT;
@@ -475,7 +476,7 @@ bool CheckSelectedItem(HWND hwndMain) {
 						}
 						else {
 							wchar_t* fileName = CutPathFromFile(lvItem.pszText);
-							wchar_t* errorText = (wchar_t*)malloc(workStringLength);
+							wchar_t* errorText = (wchar_t*)malloc(workStringLength * sizeof(TCHAR));
 							_tcscpy_s(errorText, workStringLength, fileName);
 							_tcscat_s(errorText, workStringLength, L" has no signatures.");
 							MessageBox(hwndMain, errorText, L"Error", MB_OK);
@@ -510,8 +511,7 @@ bool AddCheckedData(struct FileSigData* fileSigData, wchar_t * filePath, int ite
 	int sigDataIndex = 0;
 	int index = itemNumber;	
 	int strSize = MAX_PATH;
-	wchar_t* fileName = (wchar_t*)malloc(strSize * sizeof(wchar_t *));
-	_tcscpy_s(fileName, strSize * sizeof(wchar_t*), CutPathFromFile(filePath));
+	wchar_t* fileName = CutPathFromFile(filePath);
 
 	if (fileSigData->primarySigExists) { //we have some signatures in file
 		for (int i = 0; i < fileSigData->totalNumberOfSignatures/2; i++) {
@@ -525,12 +525,12 @@ bool AddCheckedData(struct FileSigData* fileSigData, wchar_t * filePath, int ite
 
 			// 1. Filename
 			lvItem.iSubItem = 0;
-			_tcscpy_s(lvItem.pszText, lvItem.cchTextMax * sizeof(wchar_t*), fileName);
+			_tcscpy_s(lvItem.pszText, lvItem.cchTextMax, fileName);
 			SendDlgItemMessage(hwnd, IDC_LIST1, LVM_INSERTITEM, 0, (LPARAM)& lvItem);
 			// 2. All other data
 			while (sigDataIndex < 9) {
 				lvItem.iSubItem++;
-				_tcscpy_s(lvItem.pszText, lvItem.cchTextMax * sizeof(wchar_t*), fileSigData->sigDataArray[i][sigDataIndex]);
+				_tcscpy_s(lvItem.pszText, lvItem.cchTextMax, fileSigData->sigDataArray[i][sigDataIndex]);
 				SendDlgItemMessage(hwnd, IDC_LIST1, LVM_SETITEM, 0, (LPARAM)& lvItem);
 				sigDataIndex++;
 			}		
@@ -543,13 +543,13 @@ bool AddCheckedData(struct FileSigData* fileSigData, wchar_t * filePath, int ite
 
 				// 1. Filename
 				lvItem.iSubItem = 0;
-				_tcscpy_s(lvItem.pszText, lvItem.cchTextMax * sizeof(wchar_t*), fileName);
+				_tcscpy_s(lvItem.pszText, lvItem.cchTextMax, fileName);
 				SendDlgItemMessage(hwnd, IDC_LIST1, LVM_INSERTITEM, 0, (LPARAM)& lvItem);
 
 				// 2. All other data 				
 				while (sigDataIndex < 18) {
 					lvItem.iSubItem++;
-					_tcscpy_s(lvItem.pszText, lvItem.cchTextMax * sizeof(wchar_t*), fileSigData->sigDataArray[i][sigDataIndex]);
+					_tcscpy_s(lvItem.pszText, lvItem.cchTextMax, fileSigData->sigDataArray[i][sigDataIndex]);
 					SendDlgItemMessage(hwnd, IDC_LIST1, LVM_SETITEM, 0, (LPARAM)& lvItem);
 					sigDataIndex++;
 				}
@@ -590,24 +590,6 @@ bool ResizeDialog(HWND hwnd) {
 
 wchar_t* CutPathFromFile(wchar_t* path) {
 
-	int n = 0, k = 0;
-	wchar_t* fileName = (wchar_t*)malloc(MAX_PATH * sizeof(wchar_t*));
-
-	for (int i = _tcslen(path); i >= 0; i--) {
-		if (path[i] == '\\') {
-			for (int j = i + 1; j <= _tcslen(path); j++) {
-				if (j != _tcslen(path)) {
-					fileName[k] = path[j];
-					k++;
-				}
-				else {
-					fileName[k] = '\0';
-					break;
-				}
-			}
-			break;
-		}
-	}
-
-	return fileName;
+    LPCTSTR fn=PathFindFileName(path);
+	return _tcsdup(fn ? fn : _T(""));
 }

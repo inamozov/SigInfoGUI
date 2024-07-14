@@ -66,7 +66,7 @@ bool CheckLastAddedItem(HWND hwndMain, LVITEM lvItem);
 bool CheckSelectedItem(HWND hwnd);
 bool AddCheckedData(struct FileSigData* fileSigData, wchar_t * filePath, int itemNumber, HWND hwnd, LVITEM lvItem);
 bool ResizeDialog(HWND hwnd);
-void DeleteCharsInString(LPTSTR szThumbprint, int num, wchar_t ch);
+void DeleteCharsInString(LPTSTR szThumbprint, wchar_t ch);
 bool IsOs64Bit(void);
 bool DisableWow64RedirectionIfSystem32Bit(PVOID oldValue);
 bool RevertWow64RedirectionIfPreviouslyDisabled(PVOID oldValue);

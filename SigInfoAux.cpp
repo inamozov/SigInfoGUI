@@ -21,15 +21,14 @@
 typedef BOOL(WINAPI* LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 LPFN_ISWOW64PROCESS fnIsWow64Process;
 
-void DeleteCharsInString(LPTSTR szThumbprint, int num, wchar_t ch) {
-
-	for (int i = num; i < _tcslen(szThumbprint); i++) {
-		if (szThumbprint[i] == ch) {
-			szThumbprint[i] = szThumbprint[i + 1];
-			szThumbprint[i + 1] = ch;
-			DeleteCharsInString(szThumbprint, i + 1, ch);
-		}
+void DeleteCharsInString(LPTSTR szThumbprint, wchar_t ch) {
+  int j = 0;
+  for (int i = 0; i < _tcslen(szThumbprint); i++) {
+	if (szThumbprint[i] != ch) {
+	  szThumbprint[j++] = szThumbprint[i];
 	}
+  }
+  szThumbprint[j] = 0;
 }
 
 bool IsOs64Bit(void) {

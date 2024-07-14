@@ -58,8 +58,8 @@ LPTSTR GetSignatureDate(CRYPT_PROVIDER_SGNR* psProvSigner) {
 	SYSTEMTIME sysTime;
 	DWORD strLength = MAX_PATH;
 
-	_TCHAR* workStrMiddle = (_TCHAR*)malloc(strLength);
-	_TCHAR* workStrFinal = (_TCHAR*)malloc(strLength);
+	_TCHAR* workStrMiddle = (_TCHAR*)malloc(strLength* sizeof(TCHAR));
+	_TCHAR* workStrFinal = (_TCHAR*)malloc(strLength* sizeof(TCHAR));
 
 	LPTSTR sigDateRet = NULL;
 
@@ -130,8 +130,8 @@ LPTSTR GetCertSerialNumber(PCCERT_CONTEXT pCertContext) {
 	DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
 	DWORD strLength = MAX_PATH;
 
-	_TCHAR* workStrMiddle = (_TCHAR*)malloc(strLength);
-	_TCHAR* workStrFinal = (_TCHAR*)malloc(strLength);
+	_TCHAR* workStrMiddle = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
+	_TCHAR* workStrFinal = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
 
 	LPTSTR certSNRet = NULL;
 
@@ -196,11 +196,11 @@ LPTSTR GetCertThumbprint(PCCERT_CONTEXT pCertContext) {
 	}
 
 	// 3. Convert binary data to string.
-	if (!CryptBinaryToString(pvData, cbHash, 0, NULL, &dest)) {
+	if (!CryptBinaryToString(pvData, cbHash, CRYPT_STRING_HEX, NULL, &dest)) {
 		_tprintf(_T("CryptBinaryToString failed with %x\n"), GetLastError());
 	}
 
-	szThumbprint = (LPTSTR)malloc(dest * sizeof(TCHAR));
+	szThumbprint = (LPTSTR)LocalAlloc(0, (dest+1) * sizeof(TCHAR));
 
 	if (!CryptBinaryToString(pvData, cbHash, CRYPT_STRING_HEX, szThumbprint, &dest)) {
 		_tprintf(_T("CryptBinaryToString failed with %x\n"), GetLastError());
@@ -216,8 +216,8 @@ LPTSTR GetNotBeforeDate(PCCERT_CONTEXT pCertContext) {
 
 	DWORD strLength = MAX_PATH;
 
-	_TCHAR* wrkStrNotBefore = (_TCHAR*)malloc(strLength);
-	_TCHAR* strNotBefore = (_TCHAR*)malloc(strLength);
+	_TCHAR* wrkStrNotBefore = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
+	_TCHAR* strNotBefore = (_TCHAR*)LocalAlloc(0, strLength * sizeof(TCHAR));
 
 	if (FileTimeToSystemTime(&ftNBefore, &stNBefore)) {
 		_stprintf_s(wrkStrNotBefore, strLength, _T("%.2u"), stNBefore.wDay);
@@ -244,8 +244,8 @@ LPTSTR GetNotAfterDate(PCCERT_CONTEXT pCertContext) {
 
 	DWORD strLength = MAX_PATH;
 
-	_TCHAR* wrkStrNotAfter = (_TCHAR*)malloc(strLength);
-	_TCHAR* strNotAfter = (_TCHAR*)malloc(strLength);
+	_TCHAR* wrkStrNotAfter = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
+	_TCHAR* strNotAfter = (_TCHAR*)LocalAlloc(0, strLength * sizeof(TCHAR));
 
 	if (FileTimeToSystemTime(&ftNAfter, &stNAfter)) {
 		_stprintf_s(wrkStrNotAfter, strLength, _T("%.2u"), stNAfter.wDay);
@@ -271,8 +271,8 @@ LPTSTR GetTimestampDate(CRYPT_PROVIDER_SGNR* psProvSigner) {
 	SYSTEMTIME sysTime;
 	DWORD strLength = MAX_PATH;
 
-	_TCHAR* workStrMiddle = (_TCHAR*)malloc(strLength);
-	_TCHAR* workStrFinal = (_TCHAR*)malloc(strLength);
+	_TCHAR* workStrMiddle = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
+	_TCHAR* workStrFinal = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
 
 	LPTSTR tsDateRet = NULL;
 

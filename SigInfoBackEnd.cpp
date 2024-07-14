@@ -50,7 +50,7 @@ bool ProcessData(_TCHAR* rawFilePath, struct FileSigData * fileSigData) {
 	for (int i = 0; i < SIG_DATA_ARRAY_NUM_SUB_ARRAYS; ++i) {
 		sigDataArray[i] = (wchar_t**)malloc(SIG_DATA_ARRAY_NUM_SUB_SUB_ARRAYS * sizeof(wchar_t*));
 		for (int j = 0; j < SIG_DATA_ARRAY_NUM_SUB_SUB_ARRAYS; ++j) {
-			sigDataArray[i][j] = (wchar_t*)malloc(SIG_DATA_ARRAY_NUM_CHARS_IN_ONE_STRING * sizeof(wchar_t));
+			sigDataArray[i][j] = (wchar_t*)malloc((SIG_DATA_ARRAY_NUM_CHARS_IN_ONE_STRING+1) * sizeof(wchar_t));
 			_tcscpy_s(sigDataArray[i][j], SIG_DATA_ARRAY_NUM_CHARS_IN_ONE_STRING, L"EMPTY");
 		}
 	}		
@@ -60,7 +60,7 @@ bool ProcessData(_TCHAR* rawFilePath, struct FileSigData * fileSigData) {
 	for (int i = 0; i < SIG_DATA_ARRAY_NUM_SUB_ARRAYS; ++i) {
 		fileSigData->sigDataArray[i] = (wchar_t**)malloc(SIG_DATA_ARRAY_NUM_SUB_SUB_ARRAYS * sizeof(wchar_t*));
 		for (int j = 0; j < SIG_DATA_ARRAY_NUM_SUB_SUB_ARRAYS; ++j) {
-			fileSigData->sigDataArray[i][j] = (wchar_t*)malloc(SIG_DATA_ARRAY_NUM_CHARS_IN_ONE_STRING * sizeof(wchar_t));
+			fileSigData->sigDataArray[i][j] = (wchar_t*)malloc((SIG_DATA_ARRAY_NUM_CHARS_IN_ONE_STRING+1) * sizeof(wchar_t));
 		}
 	}
 	
@@ -114,7 +114,9 @@ bool ProcessData(_TCHAR* rawFilePath, struct FileSigData * fileSigData) {
 		for (int j = 0; j < SIG_DATA_ARRAY_NUM_SUB_SUB_ARRAYS; j++) {
 			free(sigDataArray[i][j]);
 		}
+		free(sigDataArray[i]);
 	}
+	free(sigDataArray);
 
 	return retval;
 }
@@ -144,7 +146,7 @@ int VerifyAllSignatures(WINTRUST_DATA sWintrustData, GUID guidAction, bool* sigV
 		totalNumberOfSignatures += *numSecondarySigs;
 
 		// 2.2 Verify all secondary signatures
-		if (numSecondarySigs > 0) {
+		if (numSecondarySigs && *numSecondarySigs > 0) {
 			*secondarySigExists = true;
 			VerifySecondarySignatures(*numSecondarySigs, sWintrustData, guidAction, sigVerifyStates);
 		}
@@ -162,8 +164,8 @@ int FillSigData(WINTRUST_DATA sWintrustData, bool sigVerifyStates[], DWORD sigNu
 	CRYPT_PROVIDER_DATA* psProvData = NULL;
 	CRYPT_PROVIDER_SGNR* psProvSigner = NULL;
 	CRYPT_PROVIDER_CERT* psProvCert = NULL;
-	LPTSTR errorString1 = (LPTSTR)malloc(MAX_PATH);
-	LPTSTR errorString2 = (LPTSTR)malloc(MAX_PATH);
+	LPTSTR errorString1 = (LPTSTR)malloc(MAX_PATH*sizeof(TCHAR));
+	LPTSTR errorString2 = (LPTSTR)malloc(MAX_PATH*sizeof(TCHAR));
 	DWORD counterSigners = 0;
 	int counterSigNumber = 0;
 
@@ -214,9 +216,9 @@ int FillSigData(WINTRUST_DATA sWintrustData, bool sigVerifyStates[], DWORD sigNu
 		// 1.6 Thumbprint
 		LPTSTR szThumbprint = GetCertThumbprint(psProvCert->pCert);
 		if (szThumbprint) {
-			DeleteCharsInString(szThumbprint, 0, _T(' '));
-			DeleteCharsInString(szThumbprint, 0, _T('\r'));
-			DeleteCharsInString(szThumbprint, 0, _T('\n'));
+			DeleteCharsInString(szThumbprint,  _T(' '));
+			DeleteCharsInString(szThumbprint, _T('\r'));
+			DeleteCharsInString(szThumbprint, _T('\n'));
 			_tcscpy_s(sigDataArray[sigNumber][6], SIG_DATA_ARRAY_NUM_CHARS_IN_ONE_STRING, szThumbprint);
 			LocalFree(szThumbprint);
 		}
@@ -291,9 +293,9 @@ int FillSigData(WINTRUST_DATA sWintrustData, bool sigVerifyStates[], DWORD sigNu
 				// 2.6 Thumbprint
 				LPTSTR szThumbprint = GetCertThumbprint(psProvCert->pCert);
 				if (szThumbprint) {
-					DeleteCharsInString(szThumbprint, 0, _T(' '));
-					DeleteCharsInString(szThumbprint, 0, _T('\r'));
-					DeleteCharsInString(szThumbprint, 0, _T('\n'));
+					DeleteCharsInString(szThumbprint,  _T(' '));
+					DeleteCharsInString(szThumbprint, _T('\r'));
+					DeleteCharsInString(szThumbprint, _T('\n'));
 					_tcscpy_s(sigDataArray[sigNumber][15], SIG_DATA_ARRAY_NUM_CHARS_IN_ONE_STRING, szThumbprint);
 					LocalFree(szThumbprint);
 				}

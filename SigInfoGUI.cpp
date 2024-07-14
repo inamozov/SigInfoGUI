@@ -20,7 +20,7 @@ PVOID oldValue = NULL;
 bool redirectionDisabled = false;
 
 
-BOOL CALLBACK ViewDlgProc(HWND hwndView, UINT Message, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK ViewDlgProc(HWND hwndView, UINT Message, WPARAM wParam, LPARAM lParam) {
 
 	switch (Message) {
 		case WM_INITDIALOG:
@@ -45,7 +45,7 @@ BOOL CALLBACK ViewDlgProc(HWND hwndView, UINT Message, WPARAM wParam, LPARAM lPa
 	return TRUE;
 }
 
-BOOL CALLBACK AboutDlgProc(HWND hwndAbout, UINT Message, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK AboutDlgProc(HWND hwndAbout, UINT Message, WPARAM wParam, LPARAM lParam) {
 
 	switch (Message) {
 	case WM_INITDIALOG:
@@ -63,7 +63,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwndAbout, UINT Message, WPARAM wParam, LPARAM l
 	return TRUE;
 }
 
-BOOL CALLBACK DlgProc(HWND hwndMain, UINT Message, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK DlgProc(HWND hwndMain, UINT Message, WPARAM wParam, LPARAM lParam) {
 
 	switch (Message) {
 		case WM_INITDIALOG:
@@ -121,7 +121,7 @@ BOOL CALLBACK DlgProc(HWND hwndMain, UINT Message, WPARAM wParam, LPARAM lParam)
 					int subItemIndex;
 					int selectedRowIndex = 0;
 					int stringFromColumnLength = MAX_PATH;
-					wchar_t* stringFromColumn = (wchar_t*)malloc(stringFromColumnLength);
+					wchar_t* stringFromColumn = (wchar_t*)malloc(stringFromColumnLength * sizeof(TCHAR));
 					wchar_t** viewDataArray = (wchar_t**)malloc(SIG_DATA_NUM_OF_COLUMNS * sizeof(wchar_t*));
 					int oneArrayOfDataLength = 0;
 					int itemCount = SIG_DATA_NUM_OF_COLUMNS;
@@ -206,9 +206,9 @@ BOOL CALLBACK DlgProc(HWND hwndMain, UINT Message, WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR pszCmdLine, int iCmdShow)
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	hInstGl = hInst;
+	hInstGl = hInstance;
 
 	return DialogBox(hInstGl, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
 }
