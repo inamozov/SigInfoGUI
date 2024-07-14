@@ -61,44 +61,15 @@ LPTSTR GetSignatureDate(CRYPT_PROVIDER_SGNR* psProvSigner) {
 	_TCHAR* workStrMiddle = (_TCHAR*)malloc(strLength* sizeof(TCHAR));
 	_TCHAR* workStrFinal = (_TCHAR*)malloc(strLength* sizeof(TCHAR));
 
-	LPTSTR sigDateRet = NULL;
+	LPTSTR sigDateRet = (LPTSTR)LocalAlloc(0, strLength * sizeof(TCHAR));
 
-	if (FileTimeToLocalFileTime(&psProvSigner->sftVerifyAsOf, &localFt)) {
-		if (FileTimeToSystemTime(&localFt, &sysTime)) {
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wDay);
-			_tcscpy_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L"/");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wMonth);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L"/");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.4u", sysTime.wYear);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L" ");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wHour);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L":");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wMinute);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L":");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wSecond);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-		}
+	if (FileTimeToLocalFileTime(&psProvSigner->sftVerifyAsOf, &localFt)
+	  && FileTimeToSystemTime(&localFt, &sysTime)) {
+	  _stprintf_s(sigDateRet, strLength, _T("%02u/%02u/%04u %02u:%02u:%02u"), sysTime.wDay, sysTime.wMonth, sysTime.wYear, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
 	}
-
-	sigDateRet = (LPTSTR)LocalAlloc(0, strLength * sizeof(TCHAR));
-
-	_tcscpy_s(sigDateRet, strLength, workStrFinal);
-
+	else {
+	  _tcscpy_s(sigDateRet, strLength, _T("INVALID"));
+	}
 	free(workStrMiddle);
 	free(workStrFinal);
 
@@ -216,22 +187,13 @@ LPTSTR GetNotBeforeDate(PCCERT_CONTEXT pCertContext) {
 
 	DWORD strLength = MAX_PATH;
 
-	_TCHAR* wrkStrNotBefore = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
 	_TCHAR* strNotBefore = (_TCHAR*)LocalAlloc(0, strLength * sizeof(TCHAR));
 
 	if (FileTimeToSystemTime(&ftNBefore, &stNBefore)) {
-		_stprintf_s(wrkStrNotBefore, strLength, _T("%.2u"), stNBefore.wDay);
-		_tcscpy_s(strNotBefore, strLength, wrkStrNotBefore);
-
-		_tcscat_s(strNotBefore, strLength, _T("/"));
-
-		_stprintf_s(wrkStrNotBefore, strLength, _T("%.2u"), stNBefore.wMonth);
-		_tcscat_s(strNotBefore, strLength, wrkStrNotBefore);
-
-		_tcscat_s(strNotBefore, strLength, _T("/"));
-
-		_stprintf_s(wrkStrNotBefore, strLength, _T("%.4u"), stNBefore.wYear);
-		_tcscat_s(strNotBefore, strLength, wrkStrNotBefore);
+	  _stprintf_s(strNotBefore, strLength, _T("%02u/%02u/%04u"), stNBefore.wDay, stNBefore.wMonth, stNBefore.wYear);
+	}
+	else {
+	  _tcscpy_s(strNotBefore, strLength, _T("INVALID"));
 	}
 
 	return strNotBefore;
@@ -244,22 +206,13 @@ LPTSTR GetNotAfterDate(PCCERT_CONTEXT pCertContext) {
 
 	DWORD strLength = MAX_PATH;
 
-	_TCHAR* wrkStrNotAfter = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
 	_TCHAR* strNotAfter = (_TCHAR*)LocalAlloc(0, strLength * sizeof(TCHAR));
 
 	if (FileTimeToSystemTime(&ftNAfter, &stNAfter)) {
-		_stprintf_s(wrkStrNotAfter, strLength, _T("%.2u"), stNAfter.wDay);
-		_tcscpy_s(strNotAfter, strLength, wrkStrNotAfter);
-
-		_tcscat_s(strNotAfter, strLength, _T("/"));
-
-		_stprintf_s(wrkStrNotAfter, strLength, _T("%.2u"), stNAfter.wMonth);
-		_tcscat_s(strNotAfter, strLength, wrkStrNotAfter);
-
-		_tcscat_s(strNotAfter, strLength, _T("/"));
-
-		_stprintf_s(wrkStrNotAfter, strLength, _T("%.4u"), stNAfter.wYear);
-		_tcscat_s(strNotAfter, strLength, wrkStrNotAfter);
+		_stprintf_s(strNotAfter, strLength, _T("%02u/%02u/%04u"), stNAfter.wDay, stNAfter.wMonth, stNAfter.wYear);
+	}
+	else {
+	  _tcscpy_s(strNotAfter, strLength, _T("INVALID"));
 	}
 
 	return strNotAfter;
@@ -267,56 +220,21 @@ LPTSTR GetNotAfterDate(PCCERT_CONTEXT pCertContext) {
 
 LPTSTR GetTimestampDate(CRYPT_PROVIDER_SGNR* psProvSigner) {
 
-	FILETIME localFt;
-	SYSTEMTIME sysTime;
-	DWORD strLength = MAX_PATH;
+  FILETIME localFt;
+  SYSTEMTIME sysTime;
+  DWORD strLength = MAX_PATH;
 
-	_TCHAR* workStrMiddle = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
-	_TCHAR* workStrFinal = (_TCHAR*)malloc(strLength * sizeof(TCHAR));
+  LPTSTR tsDateRet = (LPTSTR)LocalAlloc(0, strLength * sizeof(TCHAR));
 
-	LPTSTR tsDateRet = NULL;
+  if (FileTimeToLocalFileTime(&psProvSigner->pasCounterSigners[0].sftVerifyAsOf, &localFt)
+	&& FileTimeToSystemTime(&localFt, &sysTime)) {
+	_stprintf_s(tsDateRet, strLength, _T("%02u/%02u/%04u %02u:%02u:%02u"), sysTime.wDay, sysTime.wMonth, sysTime.wYear, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
 
-	if (FileTimeToLocalFileTime(&psProvSigner->pasCounterSigners[0].sftVerifyAsOf, &localFt)) {
-		if (FileTimeToSystemTime(&localFt, &sysTime)) {
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wDay);
-			_tcscpy_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L"/");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wMonth);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L"/");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.4u", sysTime.wYear);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L" ");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wHour);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L":");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wMinute);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-
-			_tcscat_s(workStrFinal, strLength, L":");
-
-			_stprintf_s(workStrMiddle, strLength, L"%.2u", sysTime.wSecond);
-			_tcscat_s(workStrFinal, strLength, workStrMiddle);
-		}
-	}
-
-	tsDateRet = (LPTSTR)LocalAlloc(0, strLength * sizeof(TCHAR));
-
-	_tcscpy_s(tsDateRet, strLength, workStrFinal);
-
-	free(workStrFinal);
-	free(workStrMiddle);
-
-	return tsDateRet;
+  }
+  else {
+	_tcscpy_s(tsDateRet, strLength, _T("INVALID"));
+  }
+  return tsDateRet;
 }
 
 LPTSTR GetCertSubjectName(PCCERT_CONTEXT pCertContext) {
